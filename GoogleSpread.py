@@ -14,10 +14,8 @@ class GoogleSpread:
         )
         self.gc = gspread.authorize(CREDENTIALS)
 
-    def create(self):
-        # gc.del_spreadsheet("1xCD3c6F9AvQH9uT86wy678W80KoUwvOw")
-        gs = self.gc.create("test.xls", folder_id='1xCD3c6F9AvQH9uT86wy678W80KoUwvOw')
-        # worksheet = gs.add_worksheet(title='Sheet1', rows='1', cols='1')
+    def create(self,filename):
+        gs = self.gc.create(filename, folder_id='1xCD3c6F9AvQH9uT86wy678W80KoUwvOw')
         worksheet = gs.worksheet(title='Sheet1')
         worksheet.update_acell('A1', 'a1')
         worksheet.update_acell('B1', 'b1')
@@ -25,14 +23,22 @@ class GoogleSpread:
         worksheet.update_acell('B2', 'b2')
         gs.share('jjeaby.ec1@gmail.com', perm_type='user', role='writer')
 
-    def read(self):
-        gc1 = self.gc.open("test.xls").worksheet('시트1')
-        # gc1.update_acell('B2', 'novels')
+    def update(self, filename):
+        gc1 = self.gc.open(filename).worksheet('Sheet1')
+        gc1.update_acell('B2', 'novels')
+        
+    def read(self, filename):
+        gc1 = self.gc.open(filename).worksheet('Sheet1')
         gc2 = gc1.get_all_values()
-        print(gc2)
-
-        # sh = gc.open("python-linkage-sample")
-
+        return gc2 
 
 if __name__ == '__main__':
-    GoogleSpread().create()
+    gs = GoogleSpread()
+    gs.create('test_sheet')
+    sheet_text = gs.read('test_sheet')
+    print(sheet_text)
+    gs.update('test_sheet')
+    sheet_text = gs.read('test_sheet')
+    print(sheet_text)
+    
+
