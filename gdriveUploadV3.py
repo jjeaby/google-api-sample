@@ -1,29 +1,22 @@
-import pickle
-import os
-
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
-from tabulate import tabulate
-
-# If modifying these scopes, delete the file token.pickle.
 
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
           'https://www.googleapis.com/auth/drive.file']
+
 
 def get_gdrive_service():
     """
     인증 정보를 설정하는 부분
     """
-    creds = service_account.Credentials.from_service_account_file("./resource/ailinggo-unown-service_account.json",
+    creds = service_account.Credentials.from_service_account_file("./credential/google_api_service_account.json",
                                                                   scopes=SCOPES)
     # return Google Drive API service
     return build('drive', 'v3', credentials=creds)
 
 
-def main():
+def get_file_list():
     """
     Shows basic usage of the Drive v3 API.
     Prints the names and ids of the first 5 files the user has access to.
@@ -35,7 +28,9 @@ def main():
     # get the results
     items = results.get('files', [])
     # list all 20 files & folders
-    list_files(items)
+    files = list_files(items)
+    for file in files:
+        print(file)
 
 
 def get_size_format(b, factor=1024, suffix="B"):
@@ -81,29 +76,21 @@ def list_files(items):
             # get last modified date time
             modified_time = item["modifiedTime"]
             # append everything to the list
-            rows.append((id, name, parents, size, mime_type, modified_time))
-        print("Files:")
-        # convert to a human readable table
-        table = tabulate(rows, headers=["ID", "Name", "Parents", "Size", "Type", "Modified Time"])
-        # print the table
-        print(table)
+            rows.append({
+                "id": id, "name": name,
+                "parents": parents,
+                "size": size,
+                "mime_type": mime_type,
+                "modified_time": modified_time
+            })
+        return rows
+
 
 def upload_files(folder_id='', file=''):
     """
     Creates a folder and upload a file to it
     """
-    # authenticate account
     service = get_gdrive_service()
-    # folder details we want to make
-    # folder_metadata = {
-    #     "name": "NMTModelReviewSheet",
-    #     "mimeType": "application/vnd.google-apps.folder"
-    # }
-    # create the folder
-    # file = service.files().create(body=folder_metadata, fields="id").execute()
-    # get the folder id
-    # folder_id = file.get("id")
-    # folder_id = '1FybevDloLnEywX6AAW3MnXHZn_gWf842'
     print("Folder ID:", folder_id)
     # upload a file text file
     # first, define file metadata, such as the name and the parent folder ID
@@ -116,6 +103,17 @@ def upload_files(folder_id='', file=''):
     file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     print("File created, id:", file.get("id"))
 
+
+def delete_files(file_id=''):
+    """
+    Creates a folder and upload a file to it
+    """
+    service = get_gdrive_service()
+    service.files().delete(fileId=file_id).execute()
+    print("File delete, id:", file_id)
+
+
 if __name__ == '__main__':
-    main()
-    upload_files(folder_id='1aPvE-UPCw-3tGpH78ElwL5msRLUWDrKW', file="Expenses01.xlsx")
+    # upload_files(folder_id='1sChbkWKnHs9nQlZhkqFKJh0XGuZyFj71', file="requirements.txt")
+    # delete_files(file_id='1D8A0pJHyRhDJX6bTXom6S0TPDs4KMxlw')
+    get_file_list()
