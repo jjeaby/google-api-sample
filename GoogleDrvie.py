@@ -2,11 +2,12 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
+
 class GoogleDrive():
     def __init__(self):
-        """
+        '''
         인증 정보를 설정하는 부분
-        """
+        '''
         SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly',
                   'https://www.googleapis.com/auth/drive.file']
 
@@ -15,12 +16,11 @@ class GoogleDrive():
         # return Google Drive API service
         self.gdrive = build('drive', 'v3', credentials=creds)
 
-
     def get_file_list(self):
-        """
+        '''
         Google Drive 의 폴더/파일을 file_id, name, mimeType 등의 정보로 가져오는 코드
-        pagesize 를 100으로  설정 
-        """
+        pagesize 를 100으로  설정
+        '''
         service = self.gdrive
         # Call the Drive v3 API
         results = service.files().list(
@@ -29,27 +29,28 @@ class GoogleDrive():
         items = results.get('files', [])
         # list all 20 files & folders
         files = self.list_files(items)
-        #for file in files:
+        # for file in files:
         #    print(file)
         return files
 
-
     def get_size_format(self, b, factor=1024, suffix="B"):
-        """
-        Scale bytes to its proper byte format
+        '''
+        bytes 용량을 MB, GB 로 변환해줌
         e.g:
             1253656 => '1.20MB'
             1253656678 => '1.17GB'
-        """
+
+        '''
         for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
             if b < factor:
                 return f"{b:.2f}{unit}{suffix}"
             b /= factor
         return f"{b:.2f}Y{suffix}"
 
-
     def list_files(self, items):
-        """given items returned by Google Drive API, prints them in a tabular way"""
+        '''
+        Google Drive API 를 이용해 Google Drive 의 파일 리스트를 가져옴
+        '''
         if not items:
             # empty drive
             print('No files found.')
@@ -86,12 +87,11 @@ class GoogleDrive():
                 })
             return rows
 
-
     def upload_files(self, folder_id='', file=''):
         """
-        Creates a folder and upload a file to it
+        folder_id 를 갖는 폴더에 file 을 Google Drive 에 업로드 함
         """
-        service = get_gdrive_service()
+        service = self.gdrive
         print("Folder ID:", folder_id)
         # upload a file text file
         # first, define file metadata, such as the name and the parent folder ID
@@ -104,18 +104,17 @@ class GoogleDrive():
         file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         print("File created, id:", file.get("id"))
 
-
     def delete_files(self, file_id=''):
         """
-        Creates a folder and upload a file to it
+        file_id 를 갖는 파일을 google Drive 에서 삭제
         """
-        service = get_gdrive_service()
+        service = self.gdrive
         service.files().delete(fileId=file_id).execute()
         print("File delete, id:", file_id)
 
 
 if __name__ == '__main__':
-    gdrive = GoogleDrive() 
+    gdrive = GoogleDrive()
     # upload_files(folder_id='1sChbkWKnHs9nQlZhkqFKJh0XGuZyFj71', file="requirements.txt")
     # delete_files(file_id='1D8A0pJHyRhDJX6bTXom6S0TPDs4KMxlw')
     files = gdrive.get_file_list()
