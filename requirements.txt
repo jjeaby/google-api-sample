@@ -1,10 +1,3 @@
-PyOpenSSL
 gspread
 google-api-python-client
-
 oauth2client
-auth
-apiclient
-xlsxwriter
-konlpy
-nltk

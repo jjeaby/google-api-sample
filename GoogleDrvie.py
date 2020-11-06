@@ -88,9 +88,9 @@ class GoogleDrive():
             return rows
 
     def upload_files(self, folder_id='', file=''):
-        """
+        '''
         folder_id 를 갖는 폴더에 file 을 Google Drive 에 업로드 함
-        """
+        '''
         service = self.gdrive
         print("Folder ID:", folder_id)
         # upload a file text file
@@ -105,9 +105,9 @@ class GoogleDrive():
         print("File created, id:", file.get("id"))
 
     def delete_files(self, file_id=''):
-        """
+        '''
         file_id 를 갖는 파일을 google Drive 에서 삭제
-        """
+        '''
         service = self.gdrive
         service.files().delete(fileId=file_id).execute()
         print("File delete, id:", file_id)
